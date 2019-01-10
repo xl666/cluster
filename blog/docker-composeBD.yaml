@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+
+  db:
+    image: mariadb
+    volumes:
+      - /mnt/ceph/blog:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=wordpress
+      - MYSQL_USER=wordpress
+      - MYSQL_PASSWORD=${password}
+      - MYSQL_ROOT_PASSWORD=desarrllo
+    networks:
+      - wordpress
+
+  respaldador:
+    image: respaldador
+    environment:
+      - "CRONSTRING=* */6 * * *"
+      - REMOTE_SERVER=isfei.ddns.net
+      - REMOTE_USER=alarm
+      - REMOTE_DIR=/home/alarm/respaldoCluster/blog/
+      - RESPAL_DIR=/blog/
+    volumes:
+      - /mnt/ceph/blog:/blog
+      - /mnt/ceph/creds:/root/.ssh
+  
+networks:
+  wordpress:
+    external: true

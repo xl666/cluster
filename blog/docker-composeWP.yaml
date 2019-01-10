@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  
+  wordpress:
+    image: wordpress
+    deploy:
+      labels:
+        - "traefik.port=80"      
+        - "traefik.docker.network=proxy"
+        - "traefik.frontend.rule=Host:blog.xavierlimon.com"
+    environment:
+      - WORDPRESS_DB_HOST=db
+      - WORDPRESS_DB_USER=wordpress
+      - WORDPRESS_DB_PASSWORD=wordpress
+      - WORDPRESS_DB_NAME=wordpress
+    networks:
+      - wordpress
+      - proxy
+
+networks:
+  wordpress:
+    external: true  
+  proxy:
+    external: true

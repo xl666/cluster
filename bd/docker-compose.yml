@@ -1,0 +1,50 @@
+version: '3.1'
+
+services:
+
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${password}
+    volumes:
+      - /mnt/ceph/mariadb:/var/lib/mysql
+      - /mnt/ceph/bd/config:/etc/mysql/conf.d
+      - /mnt/ceph/bd/ssl:/ssl
+      - /mnt/ceph/bd/keys:/keys
+    ports:
+      - 3306:3306
+    networks:
+      - interna
+
+  adminer:
+    image: adminer
+    restart: always
+    deploy:
+      labels:
+        - "traefik.port=8080"      
+        - "traefik.docker.network=proxy"
+        - "traefik.frontend.rule=Host:adminer.xavierlimon.com"
+    networks:
+      - proxy
+      - interna
+
+  respaldador:
+    image: respaldador
+    environment:
+      - "CRONSTRING=* */6 * * *"
+      - REMOTE_SERVER=isfei.ddns.net
+      - REMOTE_USER=alarm
+      - REMOTE_DIR=/home/alarm/respaldoCluster/mariadb/
+      - RESPAL_DIR=/mariadb/
+    volumes:
+      - /mnt/ceph/mariadb:/mariadb
+      - /mnt/ceph/creds:/root/.ssh
+
+networks:
+  proxy:
+    external: true
+  interna:
+    driver: overlay
+    driver_opts:
+      encrypted: ""

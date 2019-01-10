@@ -1,0 +1,37 @@
+version: "3.6"
+
+
+services:
+  email:
+    hostname: xavierlimon.com
+    image: analogic/poste.io
+    volumes:
+      - /mnt/ceph/email:/data
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - "HTTPS=OFF"
+      - "HTTP_PORT=9995"
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.port=9995"      
+        - "traefik.docker.network=proxy"
+        - "traefik.frontend.rule=Host:email.xavierlimon.com"
+    networks:
+      - proxy
+
+  respaldador:
+    image: respaldador
+    environment:
+      - "CRONSTRING=* */6 * * *"
+      - REMOTE_SERVER=isfei.ddns.net
+      - REMOTE_USER=alarm
+      - REMOTE_DIR=/home/alarm/respaldoCluster/email/
+      - RESPAL_DIR=/email/
+    volumes:
+      - /mnt/ceph/email:/email
+      - /mnt/osd/creds:/root/.ssh
+
+networks:
+  proxy:
+    external: true
